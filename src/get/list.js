@@ -18,6 +18,9 @@ var getList = (pageId) => {
                 = { pid: problem.pid, type: problem.type, title: problem.title });
             writeFileSync(`data/${type}.json`, JSON.stringify(problemList));
         });
+    }).on('error', e => {
+        console.log(`Failed: Getting Page #${pageId}`);
+        setTimeout(() => getList(pageId), 400);
     });
     setTimeout(() => getList(pageId + 1), pageId == 1 ? 2000 : 800);
 }

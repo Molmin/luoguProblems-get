@@ -17,6 +17,7 @@ var getCurrentData = (type, jsonId) => {
 current = getCurrentData(type, currentJsonId = 1);
 
 var convertSample = (sample) => {
+    if (!sample) return '';
     sample = sample.split('\n');
     sample.forEach((line, index) => {
         line = line.split('\r').join('');
@@ -29,35 +30,42 @@ var convertSample = (sample) => {
     return sample.join('\n');
 };
 
+var findNextProblem = (id) => {
+    while (true) {
+        if (id == problemIdList.length) return id;
+        var tmp = getCurrentData(type, Math.floor(id / 100) + 1);
+        var PID = problemIdList[id];
+        if (tmp[PID]) id++;
+        else return id;
+    }
+};
+
 var getProblem = (id) => {
     if (id == problemIdList.length) return;
     if (Math.floor(id / 100) + 1 != currentJsonId)
         current = getCurrentData(type,
             currentJsonId = Math.floor(id / 100) + 1);
     var PID = problemIdList[id];
-    if (current[PID]) getProblem(id + 1);
-    else {
-        console.log(`Getting Problem ${PID} (${id + 1}/${problemIdList.length})`);
-        https.get(`https://www.luogu.com.cn/problem/${PID}?_contentOnly=1`, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                if (data.startsWith('<!DOCTYPE html>')) {
-                    console.log(`Failed: Getting Problem ${PID}`);
-                    return;
-                }
-                var samples = JSON.parse(data).currentData.problem.samples;
-                var result = new Array();
-                samples.forEach(sample => {
-                    result.push(convertSample(sample[0]));
-                    result.push(convertSample(sample[1]));
-                });
-                current[PID] = { s: result };
-                writeFileSync(`data/${type}/${currentJsonId}.json`, JSON.stringify(current));
+    console.log(`Getting Problem ${PID} (${id + 1}/${problemIdList.length})`);
+    https.get(`https://www.luogu.com.cn/problem/${PID}?_contentOnly=1`, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+            if (data.startsWith('<!DOCTYPE html>')) {
+                console.log(`Failed: Getting Problem ${PID}`);
+                return;
+            }
+            var samples = JSON.parse(data).currentData.problem.samples;
+            var result = new Array();
+            samples.forEach(sample => {
+                result.push(convertSample(sample[0]));
+                result.push(convertSample(sample[1]));
             });
+            current[PID] = { s: result };
+            writeFileSync(`data/${type}/${currentJsonId}.json`, JSON.stringify(current));
         });
-        setTimeout(() => getProblem(id + 1), Number(process.argv[3]));
-    }
+    }).on('error', e => console.log(`Failed: Getting Problem ${PID}`));
+    setTimeout(() => getProblem(findNextProblem(id + 1)), Number(process.argv[3]));
 }
 
-getProblem(0);
+getProblem(findNextProblem(0));

@@ -1,0 +1,52 @@
+{% extends "basic.html" %}
+{% block main %}
+<div class="topan-mainpage-auto">
+  <div class="row">
+    <div class="column-one-second">
+      <div style="padding-right: 10px;">
+        <div class="topan-section-shadow">
+          <h2>
+            题目过滤
+            <span class="search-mode--label">过滤模式：</span>
+            <select class="search-mode">
+              {% for key, name in mode %}
+              <option value="{{ key }}">{{ name }}</option>
+              {% endfor %}
+            </select>
+            <button class="topan-button-emphasize topan-button-default search-searcher">过滤</button>
+          </h2>
+          <p>
+            来源范围：
+            <button class="topan-button-emphasize topan-button-default search-range--selectAll">全选</button>
+            <button class="topan-button-commonly topan-button-default search-range--default">恢复默认设置</button>
+          </p>
+          <p>
+            {% for key, name in range %}
+            <input type="checkbox" class="search-range" id="search-range--{{ key }}" />
+            <label for="search-range--{{ key }}">{{ name }}</label>
+            {% endfor %}
+          </p>
+        </div>
+        <br>
+        <div class="topan-section-shadow">
+          <p>
+            <button class="topan-button-emphasize topan-button-default search-samples--deleteAll">删除所有</button>
+            <button class="topan-button-emphasize topan-button-default search-samples--newSample">新建一组样例</button>
+            <button class="topan-button-commonly topan-button-default search-samples--newText">新建一段文本</button>
+          </p>
+          <div class="search-sample"></div>
+        </div>
+      </div>
+    </div>
+    <div class="column-one-second">
+      <div style="padding-left: 10px;">
+        <div class="topan-section-shadow">
+          <h2>过滤结果</h2>
+          <div class="search-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
+</div>
+{% endblock %}
